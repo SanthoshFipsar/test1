@@ -3,7 +3,6 @@ name: Merge and Rename Files
 on:
   push:
     branches:
-      - uat
       - main
 
 jobs:
@@ -13,16 +12,16 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-      
-    - name: Check if merge is from main to uat
+
+    - name: Merge changes from main to uat and rename files
       run: |
-        if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/uat" ]; then
-          merged_branch=$(git log -1 --pretty=format:%P)
-          if echo "${merged_branch}" | grep -q "refs/heads/main"; then
-            git checkout uat
-            git mv dev_app.py uat_app.py
-            git mv dev_main.py uat_main.py
-            git commit -am "Renamed files from dev branch"
-            git push origin uat
-          fi
-        fi
+        git checkout main
+        git pull origin main
+        git checkout uat
+        git pull origin uat
+        git merge main --no-commit
+        git mv dev_app.py uat_app.py
+        git mv dev_main.py uat_main.py
+        git add .
+        git commit -m "Merge changes from main and rename files"
+        git push origin uat
